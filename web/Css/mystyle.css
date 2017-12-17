@@ -1,0 +1,38 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Dec 16, 2017, 12:35:26 PM
+    Author     : Eugene
+*/
+
+h1{
+    width:500px;
+    margin: auto;
+    margin-top: 20px;
+    margin-bottom: 50px;
+    background:green;
+    color: #fff;
+}
+#divSubmit{
+    text-align: center;
+    width:100px;
+    margin: auto;
+    margin-top: 10px;
+    padding:10px;
+    background: cornflowerblue;
+    border: 2px solid green;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.40s;
+}
+#divSubmit:hover{
+    background: linear-gradient;
+    color: #202020;
+    transition: 0.40s
+}
+#fileInfo{
+    line-height: 120%;
+}

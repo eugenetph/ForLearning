@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+    <h:head>
+        <link href="Css/mystyle.css" rel="stylesheet" type="text/css"/>
+        <script src="AllJavaScript/jquery-3.2.1.js"/>
+        <script src="AllJavaScript/Ascript.js"/>
+        <title>Upload Files And Write To A Folder</title>
+    </h:head>
+    <h:body>
+        <h1>Upload Files And Write To A Folder</h1>
+        <form method="POST" id="uploadForm" enctype="multipart/form-data" multiple="multiple">
+        <center><input type="file" id="uploadFiles" multiple="true"/>
+        <input type="file" id="uploadFile" multiple="true"/></center>
+        <br/>
+        <div id="divSubmit">
+        <label id="submit">Submit</label>
+        </div>
+        <center><label id="fileInfo"></label>
+        <label id="outputMsg"><br/></label></center>
+        <center><input type="button" id="deleteAll" value="Remove" hidden="hidden"/></center>
+        </form>
+    </h:body>
+</html>
+
