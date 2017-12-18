@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import javax.servlet.ServletException;
@@ -49,7 +50,7 @@ public class FileInfoServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet FileInfoServlet</title>");            
+            out.println("<title>Servlet FileInfoServlet</title>");
             out.println("</head>");
             out.println("<body>");
             out.println("<h1>Servlet FileInfoServlet at " + request.getContextPath() + "</h1>");
@@ -86,54 +87,27 @@ public class FileInfoServlet extends HttpServlet {
             throws ServletException, IOException {
         PrintWriter output = response.getWriter();
         String fileType = request.getContentType();
-        byte[] buffer = new byte[8 * 1024];
-        byte[] hashBuffer = new byte[8 * 1024];
-        byte[] hash;
-        int bytesRead;
-        int hashBytesRead;
-        String hashValue;
-        boolean dirFlag = false;
-        MessageDigest digest;
         Part filePart = request.getPart("file");
-        String fileExtensionName = getFileExtension(filePart);
-//        output.println(fileExtensionName);
-        String filePath = "C:\\Users\\Eugene\\Documents\\"
-                + "NetBeansProjects\\ForLearning\\FileWrite";
-        
-            
-        try{
-        if (fileType != null && fileType.contains("multipart/form-data")) {
+        String filePath = "C:\\Users\\Eugene Tan\\Desktop\\"
+                + "GitRepository\\ForLearning\\FileWrite";
+
+        try {
+            if (fileType != null && fileType.contains("multipart/form-data")) {
                 response.setContentType("text/plain");
                 output.println("File Uploaded Successfully! ");
-                digest = MessageDigest.getInstance("SHA-256");
-                InputStream inputStream = filePart.getInputStream();
-                InputStream hashInputStream = filePart.getInputStream();
-                while((hashBytesRead = hashInputStream.read(hashBuffer)) != -1) {
-                        digest.update(hashBuffer, 0, hashBytesRead);
-                }
-                hash = digest.digest();
-                hashValue = new BASE64Encoder().encode(hash);
-                output.println(hashValue);
                 File targetFile = new File(filePath);
-                if(targetFile.isDirectory()){
-                    targetFile = new File(filePath, hashValue + "." + fileExtensionName);
-                    dirFlag = true;
-                }
-                if(dirFlag){
+                if (targetFile.exists()) {
+                    output.println("TargetFile exist");
                     output.println("Directory created successfully");
-                    targetFile.createNewFile();
-                    FileOutputStream outputStream = new FileOutputStream(targetFile);
-                    while((bytesRead = inputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, bytesRead);
+                    createFile(filePath, filePart, output);
+                } else {
+                    output.println("TargetFile does not exist");
                 }
-                outputStream.flush();
-                outputStream.close();
+
+            } else {
+                output.println("Upload File Fail!");
             }
-                
-        } else
-            output.println("Upload File Fail!");
-        }
-        catch(Exception e){
+        } catch (Exception e) {
         }
 //    }
 //        processRequest(request, response);
@@ -148,15 +122,96 @@ public class FileInfoServlet extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-    private String getFileExtension(Part part){
+
+    private String getFileExtension(Part part) {
         String partHeader = part.getHeader("Content-Disposition");
-        for(String content: partHeader.split(";")){
-            if(content.trim().startsWith("filename")){
+        for (String content : partHeader.split(";")) {
+            if (content.trim().startsWith("filename")) {
                 return content.substring(
                         content.indexOf(".") + 1).trim().replace("\"", "");
             }
         }
         return null;
+    }
+
+    private void createFile(String filePath, Part filePart, PrintWriter output) {
+        File targetFile = null;
+        InputStream inputStream;
+        FileOutputStream outputStream;
+        byte[] buffer = new byte[8 * 1024];
+        byte[] hash = null;
+        int bytesRead;
+        String fileExtensionName;
+        String hashFileName;
+        try {
+            inputStream = filePart.getInputStream();
+            fileExtensionName = getFileExtension(filePart);
+            hashFileName = hashFileName(filePart, output);
+            targetFile = new File(filePath, hashFileName + "." + fileExtensionName);
+            targetFile.createNewFile();
+            outputStream = new FileOutputStream(targetFile);
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            outputStream.flush();
+            outputStream.close();
+        } catch (Exception e) {
+
+        }
+
+    }
+
+    private String hashFileName(Part filePart, PrintWriter output) {
+        MessageDigest digest;
+        InputStream inputStream;
+        byte[] buffer = new byte[8 * 1024];
+        byte[] hash = null;
+        String hashValue;
+        int bytesRead;
+
+        try {
+            inputStream = filePart.getInputStream();
+            digest = MessageDigest.getInstance("SHA-256");
+            output.println();
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                digest.update(buffer, 0, bytesRead);
+            }
+            hash = digest.digest();
+            hashValue = base16Encoder(hash);
+
+            return hashValue;
+        } catch (Exception e) {
+
+        }
+        return null;
+    }
+
+    private String base16Encoder(byte[] hash) {
+        int quotient;
+        int remainder;
+        String hexadecimal = "";
+        String reverse = "";
+        String[] hexAlpha = {"a", "b", "c", "d", "e", "f"};
+        for (Byte b : hash) {
+            if (b < 0) {
+                quotient = b + 256;
+            } else {
+                quotient = b;
+            }
+            while (quotient != 0) {
+                remainder = quotient % 16;
+                if (remainder > 9) {
+                    reverse += hexAlpha[remainder - 10];
+
+                } else {
+                    reverse += Integer.toString(remainder);
+                }
+                quotient /= 16;
+            }
+            hexadecimal += new StringBuffer(reverse).reverse().toString();
+            reverse = "";
+        }
+        return hexadecimal;
     }
 
 }
