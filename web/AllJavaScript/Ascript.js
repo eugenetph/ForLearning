@@ -55,11 +55,13 @@ $(document).ready(function () {
                     contentType: false,
                     data: formData,
                     success: function (responseText) {
-                        $('#outputMsg').text(responseText);
+                        document.getElementById("outputMsg").innerHTML = responseText;
+//                        $('#outputMsg').text(responseText);
                         $("#submit").prop("disabled", false);
                     },
                     error: function (e) {
-                        $('#outputMsg').text(e.responseText);
+                        document.getElementById("outputMsg").innerHTML = e.responseText;
+//                        $('#outputMsg').text(e.responseText);
                         $("#submit").prop("disabled", false);
                     }
                 });

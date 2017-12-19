@@ -18,6 +18,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
@@ -42,6 +44,7 @@ public class FileInfoServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    Set<String> fileSet;
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -88,8 +91,8 @@ public class FileInfoServlet extends HttpServlet {
         PrintWriter output = response.getWriter();
         String fileType = request.getContentType();
         Part filePart = request.getPart("file");
-        String filePath = "C:\\Users\\Eugene Tan\\Desktop\\"
-                + "GitRepository\\ForLearning\\FileWrite";
+        String filePath = "C:\\Users\\Eugene\\Desktop\\GitRepository"
+                + "\\DependencyCheck\\DependencyCheck\\Queue";
 
         try {
             if (fileType != null && fileType.contains("multipart/form-data")) {
@@ -139,22 +142,33 @@ public class FileInfoServlet extends HttpServlet {
         InputStream inputStream;
         FileOutputStream outputStream;
         byte[] buffer = new byte[8 * 1024];
-        byte[] hash = null;
         int bytesRead;
         String fileExtensionName;
+        String hashValue;
         String hashFileName;
         try {
+            fileSet = storeFileNameInHashSet();
             inputStream = filePart.getInputStream();
             fileExtensionName = getFileExtension(filePart);
-            hashFileName = hashFileName(filePart, output);
-            targetFile = new File(filePath, hashFileName + "." + fileExtensionName);
-            targetFile.createNewFile();
-            outputStream = new FileOutputStream(targetFile);
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
+            hashValue = hashFileName(filePart, output);
+            hashFileName = hashValue + "." + fileExtensionName;
+//            for(String s: fileSet){
+//                output.println(s);
+//            }
+            if (!searchFile(hashFileName)) {
+                output.println("True!");
+                targetFile = new File(filePath, hashFileName);
+                targetFile.createNewFile();
+                outputStream = new FileOutputStream(targetFile);
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+                outputStream.flush();
+                outputStream.close();
             }
-            outputStream.flush();
-            outputStream.close();
+            else{
+                output.println("False!");
+            }
         } catch (Exception e) {
 
         }
@@ -212,6 +226,25 @@ public class FileInfoServlet extends HttpServlet {
             reverse = "";
         }
         return hexadecimal;
+    }
+    private Set<String> storeFileNameInHashSet(){
+        String path = "C:\\Users\\Eugene\\Desktop\\"
+                + "GitRepository\\DependencyCheck\\DependencyCheck\\Complete";
+        Set<String> files = new HashSet<String>();
+        File directory = new File(path);
+        File[] directoryFiles = directory.listFiles();
+        
+        String filename;
+        
+        for(int i = 0; i < directoryFiles.length; i++){
+            filename = directoryFiles[i].getName();
+            files.add(filename);
+        }
+        return files;
+    }
+    
+    public boolean searchFile(String filename){
+        return fileSet.contains(filename);
     }
 
 }
